@@ -34,11 +34,13 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include <string.h>
+#include "../../../custom_threads/custom_threads_init.h"
 
 #ifdef RT_USING_FINSH
 #include <finsh.h>
 
 #define LIST_FIND_OBJ_NR 8
+
 
 long hello(void)
 {
@@ -909,5 +911,15 @@ long list(void)
     return 0;
 }
 MSH_CMD_EXPORT(list, list all commands in system)
+
+long launch_test_thread(void)
+{
+    //rt_kprintf("\nThis command will activate a thread.\n\n");
+
+    rt_thread_startup(&print_string_thread);
+
+    return 0;
+}
+MSH_CMD_EXPORT(launch_test_thread, this commands activates a custom thread);
 
 #endif /* RT_USING_FINSH */

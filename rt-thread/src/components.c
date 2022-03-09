@@ -19,6 +19,7 @@
 
 #include <rthw.h>
 #include <rtthread.h>
+#include "../../custom_threads/custom_threads_init.h"
 
 #ifdef RT_USING_USER_MAIN
 #ifndef RT_MAIN_THREAD_STACK_SIZE
@@ -261,6 +262,9 @@ int rtthread_startup(void)
 
     /* idle thread initialization */
     rt_thread_idle_init();
+
+    /* test thread (print string) initialization */
+    custom_threads_init();
 
 #ifdef RT_USING_SMP
     rt_hw_spin_lock(&_cpus_lock);
