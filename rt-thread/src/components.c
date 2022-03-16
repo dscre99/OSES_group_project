@@ -20,6 +20,7 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include "../../custom_threads/custom_threads_init.h"
+#include "../../custom_timers/custom_timers_init.h"
 
 #ifdef RT_USING_USER_MAIN
 #ifndef RT_MAIN_THREAD_STACK_SIZE
@@ -264,7 +265,10 @@ int rtthread_startup(void)
     rt_thread_idle_init();
 
     /* test thread (print string) initialization */
-    custom_threads_init();
+    //custom_threads_init();
+
+    /* custom timers initialization and startup */
+    custom_timers_init();
 
 #ifdef RT_USING_SMP
     rt_hw_spin_lock(&_cpus_lock);

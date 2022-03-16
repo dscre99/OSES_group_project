@@ -34,6 +34,7 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include <string.h>
+#include "../../../custom_threads/custom_threads.h"
 #include "../../../custom_threads/custom_threads_init.h"
 
 #ifdef RT_USING_FINSH
@@ -916,7 +917,7 @@ long launch_test_thread(void)
 {
     //rt_kprintf("\nThis command will activate a thread.\n\n");
 
-    rt_thread_startup(&print_string_thread);
+    //rt_thread_startup(&print_string_thread);
 
     return 0;
 }

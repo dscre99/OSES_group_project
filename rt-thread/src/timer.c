@@ -23,6 +23,9 @@
 #include <rtthread.h>
 #include <rthw.h>
 
+// enables the usage of of soft_timers
+#define RT_USING_TIMER_SOFT
+
 /* hard timer list */
 static rt_list_t _timer_list[RT_TIMER_SKIP_LIST_LEVEL];
 
