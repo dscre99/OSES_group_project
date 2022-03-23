@@ -41,9 +41,9 @@ void generate_value(void * parameters){
     int *val_p = (int *)parameters;
 
     rt_kprintf("Generated value:: %d\n", *val_p);
-    *val_p += 1;
-
     rt_mb_send(&mb, (rt_uint32_t)*val_p);
+
+    *val_p += 1;
 
     return;
 }
