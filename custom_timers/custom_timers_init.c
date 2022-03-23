@@ -12,6 +12,7 @@
 #include <rthw.h>
 #include "../custom_threads/thread_functions.h"
 #include "../custom_threads/custom_threads_init.h"
+#include "../custom_mailbox/custom_mailbox_init.h"
 
 #define ONE_SECOND 1000
 
@@ -41,6 +42,8 @@ void generate_value(void * parameters){
 
     rt_kprintf("Generated value:: %d\n", *val_p);
     *val_p += 1;
+
+    rt_mb_send(&mb, (rt_uint32_t)*val_p);
 
     return;
 }

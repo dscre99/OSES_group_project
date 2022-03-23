@@ -10,6 +10,8 @@
 #ifndef CUSTOM_MAILBOX_CUSTOM_MAILBOX_INIT_H_
 #define CUSTOM_MAILBOX_CUSTOM_MAILBOX_INIT_H_
 
+extern struct rt_mailbox mb;
+
 int custom_mailbox_init(void);
 
 #endif /* CUSTOM_MAILBOX_CUSTOM_MAILBOX_INIT_H_ */
