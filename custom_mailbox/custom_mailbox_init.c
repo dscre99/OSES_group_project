@@ -11,7 +11,7 @@
 #include <rtthread.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 
-static struct rt_mailbox mb;
+struct rt_mailbox mb;
 
 static char mb_pool[128];
 
