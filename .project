@@ -1,29 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-  <name>OSES_group_project</name>
-  <comment />
-  <projects>
+	<name>OSES_group_project</name>
+	<comment></comment>
+	<projects>
 	</projects>
-  <buildSpec>
-    <buildCommand>
-      <name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-      <triggers>clean,full,incremental,</triggers>
-      <arguments>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<triggers>clean,full,incremental,</triggers>
+			<arguments>
 			</arguments>
-    </buildCommand>
-    <buildCommand>
-      <name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
-      <triggers>full,incremental,</triggers>
-      <arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<triggers>full,incremental,</triggers>
+			<arguments>
 			</arguments>
-    </buildCommand>
-  </buildSpec>
-  <natures>
-    <nature>org.eclipse.cdt.core.cnature</nature>
-    <nature>org.rt-thread.studio.rttnature</nature>
-    <nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
-    <nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
-  </natures>
-  <linkedResources>
-    </linkedResources>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.rt-thread.studio.rttnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>stm32f4xx_hal_flash.c</name>
+			<type>1</type>
+			<location>C:/Users/david/OneDrive/Desktop/OSES_project/OSES_group_project/libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c</location>
+		</link>
+		<link>
+			<name>stm32f4xx_hal_flash_ex.c</name>
+			<type>1</type>
+			<location>C:/Users/david/OneDrive/Desktop/OSES_project/OSES_group_project/libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c</location>
+		</link>
+	</linkedResources>
 </projectDescription>

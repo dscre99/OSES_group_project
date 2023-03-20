@@ -272,7 +272,8 @@ int rtthread_startup(void)
     custom_mailbox_init();
 
     /* custom timers initialization and startup */
-    custom_timers_init();
+    //custom_timers_init();
+
 
 #ifdef RT_USING_SMP
     rt_hw_spin_lock(&_cpus_lock);

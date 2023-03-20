@@ -13,7 +13,6 @@
 #include <board.h>
 #include "../custom_threads/thread_functions.h"
 #include "../custom_threads/custom_threads_init.h"
-#include "../custom_mailbox/custom_mailbox_init.h"
 
 #define ONE_SECOND 1000
 #define _25_MSECOND 25
@@ -22,7 +21,7 @@
 #define BUT0_PIN    GET_PIN(C, 13)
 
 void generate_value(void * parameters);
-void brake_detection(void * parameters);
+//void brake_detection(void * parameters);
 
 static struct rt_timer print_timer;
 static struct rt_timer brake_timer;
@@ -44,7 +43,7 @@ int custom_timers_init(void)
 
     return 0;
 }
-
+/*
 void generate_value(void * parameters){
     int *val_p = (int *)parameters;
 
@@ -71,7 +70,7 @@ void brake_detection(void * parameters){
 }
 
 // test timer with function
-/*int custom_timers_init(void)
+int custom_timers_init(void)
 {
     // print_string timer initialization
     rt_timer_init(&print_timer, "print_timer", print_string, RT_NULL, ONE_SECOND, RT_TIMER_FLAG_PERIODIC);
