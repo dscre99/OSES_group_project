@@ -92,12 +92,11 @@ void speed_detection(void * parameters){
 }
 
 void display_management(void * parameters){
+    int speed_value = 0;
 
     while (1)
     {
         //rt_kprintf("display_management\n");
-
-        int speed_value = 0;
 
         /* Receive messages from the message queue */
         while (rt_mb_recv(&mb, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
