@@ -98,7 +98,7 @@ void custom_threads_init(void)
                                            RT_NULL, auxiliary_light_management_thread_stack, sizeof(auxiliary_light_management_thread_stack),
                                            6, 20);
 
-    rt_thread_startup(&receive_message_thread);
+    //rt_thread_startup(&receive_message_thread);
     rt_thread_startup(&brake_detection_thread);
     rt_thread_startup(&throttle_detection_thread);
     rt_thread_startup(&speed_detection_thread);

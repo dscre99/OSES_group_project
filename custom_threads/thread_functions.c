@@ -105,7 +105,7 @@ void display_management(void * parameters){
         }
 
         // update display information
-        rt_kprintf("\nDIPLAY:: |Speed: %d|\n", speed_value);
+        rt_kprintf("\nDISPLAY:: |Speed: %d|\n", speed_value);
 
         rt_thread_mdelay(250);
     }
