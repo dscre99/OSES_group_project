@@ -11,6 +11,7 @@
 #define CUSTOM_MAILBOX_CUSTOM_MAILBOX_INIT_H_
 
 extern struct rt_mailbox mb;
+extern struct rt_mailbox mb_speed_display;
 
 int custom_mailbox_init(void);
 

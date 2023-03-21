@@ -84,7 +84,7 @@ void speed_detection(void * parameters){
         //rt_kprintf("speed_detection\n");
         speed += 1;
         speed = speed%100;
-        rt_mb_send(&mb, (rt_uint32_t) speed);
+        rt_mb_send(&mb_speed_display, (rt_uint32_t) speed);
 
         rt_thread_mdelay(50);
     }
@@ -99,7 +99,7 @@ void display_management(void * parameters){
         //rt_kprintf("display_management\n");
 
         /* Receive messages from the message queue */
-        while (rt_mb_recv(&mb, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
+        while (rt_mb_recv(&mb_speed_display, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
         {
             // do nothing, simply receive all messages
         }
