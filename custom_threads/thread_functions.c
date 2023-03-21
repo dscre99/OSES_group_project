@@ -77,10 +77,14 @@ void throttle_detection(void * parameters){
 }
 
 void speed_detection(void * parameters){
+    int speed = 0;
 
     while (1)
     {
-        rt_kprintf("speed_detection\n");
+        //rt_kprintf("speed_detection\n");
+        speed += 1;
+        speed = speed%100;
+        rt_mb_send(&mb, (rt_uint32_t) speed);
 
         rt_thread_mdelay(50);
     }
@@ -91,7 +95,18 @@ void display_management(void * parameters){
 
     while (1)
     {
-        rt_kprintf("display_management\n");
+        //rt_kprintf("display_management\n");
+
+        int speed_value = 0;
+
+        /* Receive messages from the message queue */
+        while (rt_mb_recv(&mb, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+
+        // update display information
+        rt_kprintf("\nDIPLAY:: |Speed: %d|\n", speed_value);
 
         rt_thread_mdelay(250);
     }
