@@ -13,9 +13,15 @@
 
 struct rt_mailbox mb;
 struct rt_mailbox mb_speed_display;
+struct rt_mailbox mb_mottemp_display;
+struct rt_mailbox mb_battemp_display;
+struct rt_mailbox mb_batlevel_display;
 
 static char mb_pool[128];
 static char mb_speed_display_pool[128];
+static char mb_mottemp_display_pool[16];
+static char mb_battemp_display_pool[16];
+static char mb_batlevel_display_pool[24];
 
 int custom_mailbox_init(void)
 {
@@ -33,7 +39,7 @@ int custom_mailbox_init(void)
         return -1;
     }
 
-    // initializes receive_message mailbox
+    // initializes speed_detection-display_management mailbox
     err_control = rt_mb_init(&mb_speed_display,
                         "mb_speed_display",                     /* Name is mb_speed_display*/
                         &mb_speed_display_pool[0],              /* The memory pool used by the mailbox is mb_pool */
@@ -42,6 +48,42 @@ int custom_mailbox_init(void)
     if (err_control != RT_EOK)
     {
         rt_kprintf("init speed_detection-display_manager mailbox failed.\n");
+        return -1;
+    }
+
+    // initializes motor_temperature-display_management mailbox
+    err_control = rt_mb_init(&mb_mottemp_display,
+                        "mb_mottemp_display",                   /* Name is mb_speed_display*/
+                        &mb_mottemp_display_pool,               /* The memory pool used by the mailbox is mb_pool */
+                        sizeof(mb_mottemp_display_pool) / 4,    /* The number of messages in the mailbox because a message occupies 4 bytes */
+                        RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+    if (err_control != RT_EOK)
+    {
+        rt_kprintf("init motor_temperature-display_manager mailbox failed.\n");
+        return -1;
+    }
+
+    // initializes battery_temperature-display_management mailbox
+    err_control = rt_mb_init(&mb_battemp_display,
+                        "mb_battemp_display",                   /* Name is mb_speed_display*/
+                        &mb_battemp_display_pool,               /* The memory pool used by the mailbox is mb_pool */
+                        sizeof(mb_battemp_display_pool) / 4,    /* The number of messages in the mailbox because a message occupies 4 bytes */
+                        RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+    if (err_control != RT_EOK)
+    {
+        rt_kprintf("init battery_temperature-display_manager mailbox failed.\n");
+        return -1;
+    }
+
+    // initializes battery_level-display_management mailbox
+    err_control = rt_mb_init(&mb_batlevel_display,
+                        "mb_batlevel_display",                  /* Name is mb_speed_display*/
+                        &mb_batlevel_display_pool,              /* The memory pool used by the mailbox is mb_pool */
+                        sizeof(mb_batlevel_display_pool) / 4,   /* The number of messages in the mailbox because a message occupies 4 bytes */
+                        RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+    if (err_control != RT_EOK)
+    {
+        rt_kprintf("init battery_level-display_manager mailbox failed.\n");
         return -1;
     }
 

@@ -82,8 +82,11 @@ void speed_detection(void * parameters){
     while (1)
     {
         //rt_kprintf("speed_detection\n");
+
+        // senses actual speed
         speed += 1;
         speed = speed%100;
+        // sends speed value to display_manager
         rt_mb_send(&mb_speed_display, (rt_uint32_t) speed);
 
         rt_thread_mdelay(50);
@@ -93,19 +96,51 @@ void speed_detection(void * parameters){
 
 void display_management(void * parameters){
     int speed_value = 0;
+    int motor_temperature_warning = -1;
+    int battery_temperature_warning = -1;
+    int battery_level_value = -1;
 
     while (1)
     {
         //rt_kprintf("display_management\n");
 
-        /* Receive messages from the message queue */
+        // receive messages from speed_detection
         while (rt_mb_recv(&mb_speed_display, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+        // receive messages from motor_temperature
+        while (rt_mb_recv(&mb_mottemp_display, (rt_ubase_t *) (&motor_temperature_warning), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+        // receive messages from battery_temperature
+        while (rt_mb_recv(&mb_battemp_display, (rt_ubase_t *) (&battery_temperature_warning), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+        // receive messages from battery_level
+        while (rt_mb_recv(&mb_batlevel_display, (rt_ubase_t *) (&battery_level_value), RT_WAITING_NO) == RT_EOK)
         {
             // do nothing, simply receive all messages
         }
 
         // update display information
-        rt_kprintf("\nDISPLAY:: |Speed: %d|\n", speed_value);
+        rt_kprintf("\nDISPLAY:: | Speed: %d | Battery: %d\% |\n", speed_value, battery_level_value);
+
+        // displays warnings if detected
+        if (motor_temperature_warning)
+        {
+            rt_kprintf("WARNING! High MOTOR temperature!\n");
+        }
+        if (battery_temperature_warning)
+        {
+            rt_kprintf("WARNING! High BATTERY temperature!\n");
+        }
+        if (battery_level_value <= 15)
+        {
+            rt_kprintf("WARNING! Low BATTERY level!\n");
+        }
 
         rt_thread_mdelay(250);
     }
@@ -113,10 +148,24 @@ void display_management(void * parameters){
 }
 
 void motor_temperature(void * parameters){
+    int temperature_warning = 1;
 
     while (1)
     {
-        rt_kprintf("motor_temperature\n");
+        //rt_kprintf("motor_temperature\n");
+
+        // senses temperature warning
+        if (temperature_warning)
+        {
+            temperature_warning = 0;
+        }
+        else
+        {
+            temperature_warning = 1;
+        }
+
+        // sends temperature warning to display_manager
+        rt_mb_send(&mb_mottemp_display, (rt_uint32_t) temperature_warning);
 
         rt_thread_mdelay(1500);
     }
@@ -124,10 +173,24 @@ void motor_temperature(void * parameters){
 }
 
 void battery_temperature(void * parameters){
+    int temperature_warning = 1;
 
     while (1)
     {
-        rt_kprintf("battery_temperature\n");
+        //rt_kprintf("battery_temperature\n");
+
+        // senses temperature warning
+        if (temperature_warning)
+        {
+            temperature_warning = 0;
+        }
+        else
+        {
+            temperature_warning = 1;
+        }
+
+        // sends temperature warning to display_manager
+        rt_mb_send(&mb_battemp_display, (rt_uint32_t) temperature_warning);
 
         rt_thread_mdelay(1500);
     }
@@ -135,10 +198,23 @@ void battery_temperature(void * parameters){
 }
 
 void battery_level(void * parameters){
+    int battery_level = 101;
 
     while (1)
     {
-        rt_kprintf("battery_level\n");
+        //rt_kprintf("battery_level\n");
+
+        // senses battery level
+        battery_level -= 1;
+
+        // sends battery level to display_manager
+        rt_mb_send(&mb_batlevel_display, (rt_uint32_t) battery_level);
+
+        // DEBUG: restores battery
+        if (battery_level == 0)
+        {
+            battery_level = 101;
+        }
 
         rt_thread_mdelay(1000);
     }
