@@ -16,6 +16,7 @@ extern struct rt_mailbox mb_mottemp_display;
 extern struct rt_mailbox mb_battemp_display;
 extern struct rt_mailbox mb_batlevel_display;
 extern struct rt_mailbox mb_brake_throttle;
+extern struct rt_mailbox mb_speed_throttle;
 
 int custom_mailbox_init(void);
 

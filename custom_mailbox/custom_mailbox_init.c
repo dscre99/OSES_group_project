@@ -17,6 +17,7 @@ struct rt_mailbox mb_mottemp_display;
 struct rt_mailbox mb_battemp_display;
 struct rt_mailbox mb_batlevel_display;
 struct rt_mailbox mb_brake_throttle;
+struct rt_mailbox mb_speed_throttle;
 
 static char mb_pool[128];
 static char mb_speed_display_pool[128];
@@ -24,6 +25,7 @@ static char mb_mottemp_display_pool[16];
 static char mb_battemp_display_pool[16];
 static char mb_batlevel_display_pool[24];
 static char mb_brake_throttle_pool[128];
+static char mb_speed_throttle_pool[128];
 
 int custom_mailbox_init(void)
 {
@@ -98,6 +100,18 @@ int custom_mailbox_init(void)
     if (err_control != RT_EOK)
     {
         rt_kprintf("init brake_detection-throttle_detection mailbox failed.\n");
+        return -1;
+    }
+
+    // initializes speed_detection-throttle_detection mailbox
+    err_control = rt_mb_init(&mb_speed_throttle,
+                        "mb_speed_throttle",                    /* Name is mb_speed_throttle*/
+                        &mb_speed_throttle_pool,                /* The memory pool used by the mailbox is mb_pool */
+                        sizeof(mb_speed_throttle_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
+                        RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+    if (err_control != RT_EOK)
+    {
+        rt_kprintf("init speed_detection-throttle_detection mailbox failed.\n");
         return -1;
     }
 

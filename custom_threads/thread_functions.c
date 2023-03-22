@@ -89,13 +89,23 @@ void throttle_detection(void * parameters){
         {
             // do nothing, simply receive all messages
         }
+        // receive messages from brake_detection
+        while (rt_mb_recv(&mb_speed_throttle, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
 
         // TO BE COMPLETED
-        if(brake_detected){
+        if (brake_detected)
+        {
             // disable motor for safety reason
-        }else if (speed_value > SPEED_LIMIT) {
+        }
+        else if (speed_value > SPEED_LIMIT)
+        {
             // disable motor, generates a sort of PWM that acts as speed limiter
-        }else {
+        }
+        else
+        {
             // set motor power proportional to detected throttle
         }
 
@@ -114,6 +124,8 @@ void speed_detection(void * parameters){
         // senses actual speed
         speed += 1;
         speed = speed%100;
+        // sends speed value to throttle_detection
+        rt_mb_send(&mb_speed_throttle, (rt_uint32_t) speed);
         // sends speed value to display_manager
         rt_mb_send(&mb_speed_display, (rt_uint32_t) speed);
 
