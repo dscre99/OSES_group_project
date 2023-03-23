@@ -16,6 +16,11 @@
 #define LED0_PIN    GET_PIN(A, 5)
 #define BUT0_PIN    GET_PIN(C, 13)
 
+#define BUT_THROTTLE    GET_PIN(A, 10)
+#define BUT_BRAKE       GET_PIN(A, 10)
+#define LED_BRAKE       GET_PIN(A, 10)
+
+
 void print_string(void *parameter)
 {
     rt_kprintf("\nThread 'print_string' activated\n");
@@ -45,9 +50,10 @@ void receive_message(void *parameter)
 }
 
 void brake_detection(void * parameters){
+    rt_pin_mode(BUT_BRAKE, PIN_MODE_INPUT_PULLUP);
 
     while(1){
-        if (rt_pin_read(BUT0_PIN) != 1)
+        if (rt_pin_read(BUT_BRAKE) != 1)
         {
             rt_pin_write(LED0_PIN, PIN_HIGH);
             //rt_mb_send(&mb, (rt_uint32_t) 1);
@@ -66,10 +72,18 @@ void brake_detection(void * parameters){
 }
 
 void throttle_detection(void * parameters){
+    rt_pin_mode(BUT_THROTTLE, PIN_MODE_INPUT_PULLUP);
 
     while (1)
     {
-        rt_kprintf("throttle_detection\n");
+        if (rt_pin_read(BUT_THROTTLE) != 1)
+        {
+            rt_kprintf("throttle_detection: 1\n");
+        }
+        else
+        {
+            rt_kprintf("throttle_detection: 0\n");
+        }
 
         rt_thread_mdelay(50);
     }
