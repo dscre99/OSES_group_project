@@ -21,6 +21,7 @@ void motor_temperature(void * parameters);
 void battery_temperature(void * parameters);
 void battery_level(void * parameters);
 void auxiliary_light_management(void * parameters);
+void auxiliary_light_blink(void * parameters);
 
 
 #endif /* CUSTOM_THREADS_THREAD_FUNCTIONS_H_ */
