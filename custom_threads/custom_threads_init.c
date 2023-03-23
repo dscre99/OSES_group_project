@@ -46,6 +46,9 @@ static rt_uint8_t battery_level_thread_stack[512];
 struct rt_thread auxiliary_light_management_thread;
 static rt_uint8_t auxiliary_light_management_thread_stack[512];
 
+struct rt_thread auxiliary_light_blink_thread;
+static rt_uint8_t auxiliary_light_blink_thread_stack[512];
+
 
 void launch_print_string_thread(void *parameter)
 {
@@ -74,29 +77,32 @@ void custom_threads_init(void)
                     RT_NULL, receive_message_thread_stack, sizeof(receive_message_thread_stack),
                     10, 20);
     rt_thread_init(&brake_detection_thread, "brake_detection_thread", brake_detection,
-                        RT_NULL, brake_detection_thread_stack, sizeof(brake_detection_thread_stack),
-                        1, 20);
+                    RT_NULL, brake_detection_thread_stack, sizeof(brake_detection_thread_stack),
+                    1, 20);
     rt_thread_init(&throttle_detection_thread, "throttle_detection_thread", throttle_detection,
-                            RT_NULL, throttle_detection_thread_stack, sizeof(throttle_detection_thread_stack),
-                            2, 20);
+                    RT_NULL, throttle_detection_thread_stack, sizeof(throttle_detection_thread_stack),
+                    2, 20);
     rt_thread_init(&speed_detection_thread, "speed_detection_thread", speed_detection,
-                                RT_NULL, speed_detection_thread_stack, sizeof(speed_detection_thread_stack),
-                                3, 20);
+                    RT_NULL, speed_detection_thread_stack, sizeof(speed_detection_thread_stack),
+                    3, 20);
     rt_thread_init(&display_management_thread, "display_management_thread", display_management,
-                                RT_NULL, display_management_thread_stack, sizeof(display_management_thread_stack),
-                                4, 20);
+                    RT_NULL, display_management_thread_stack, sizeof(display_management_thread_stack),
+                    4, 20);
     rt_thread_init(&motor_temperature_thread, "motor_temperature_thread", motor_temperature,
-                                   RT_NULL, motor_temperature_thread_stack, sizeof(motor_temperature_thread_stack),
-                                   5, 20);
+                    RT_NULL, motor_temperature_thread_stack, sizeof(motor_temperature_thread_stack),
+                    5, 20);
     rt_thread_init(&battery_temperature_thread, "battery_temperature_thread", battery_temperature,
-                                     RT_NULL, battery_temperature_thread_stack, sizeof(battery_temperature_thread_stack),
-                                     5, 20);
+                    RT_NULL, battery_temperature_thread_stack, sizeof(battery_temperature_thread_stack),
+                    5, 20);
     rt_thread_init(&battery_level_thread, "battery_level_thread", battery_level,
-                                       RT_NULL, battery_level_thread_stack, sizeof(battery_level_thread_stack),
-                                       6, 20);
+                    RT_NULL, battery_level_thread_stack, sizeof(battery_level_thread_stack),
+                    6, 20);
     rt_thread_init(&auxiliary_light_management_thread, "auxiliary_light_management_thread", auxiliary_light_management,
-                                           RT_NULL, auxiliary_light_management_thread_stack, sizeof(auxiliary_light_management_thread_stack),
-                                           6, 20);
+                    RT_NULL, auxiliary_light_management_thread_stack, sizeof(auxiliary_light_management_thread_stack),
+                    6, 20);
+    rt_thread_init(&auxiliary_light_blink_thread, "auxiliary_light_blink_thread", auxiliary_light_blink,
+                    RT_NULL, auxiliary_light_blink_thread_stack, sizeof(auxiliary_light_blink_thread_stack),
+                    6, 20);
 
     rt_thread_startup(&receive_message_thread);
     rt_thread_startup(&brake_detection_thread);
@@ -107,6 +113,7 @@ void custom_threads_init(void)
     rt_thread_startup(&battery_temperature_thread);
     rt_thread_startup(&battery_level_thread);
     rt_thread_startup(&auxiliary_light_management_thread);
+    rt_thread_startup(&auxiliary_light_blink_thread);
 
 
     return;

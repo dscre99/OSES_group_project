@@ -16,6 +16,10 @@
 #define LED0_PIN    GET_PIN(A, 5)
 #define BUT0_PIN    GET_PIN(C, 13)
 #define SPEED_LIMIT 30
+#define OFF 0
+#define LEFT 1
+#define RIGHT 2
+#define EMERGENCY 3
 
 void print_string(void *parameter)
 {
@@ -50,7 +54,8 @@ void brake_detection(void * parameters){
     while(1){
         if (rt_pin_read(BUT0_PIN) != 1)
         {
-            // if pin is high it means user engaged the brakes
+            // if pin is low it means user engaged the brakes
+            //      (button is pressed)
 
             // brake light goes on
             rt_pin_write(LED0_PIN, PIN_HIGH);
@@ -89,7 +94,7 @@ void throttle_detection(void * parameters){
         {
             // do nothing, simply receive all messages
         }
-        // receive messages from brake_detection
+        // receive messages from speed_detection
         while (rt_mb_recv(&mb_speed_throttle, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
         {
             // do nothing, simply receive all messages
@@ -139,6 +144,7 @@ void display_management(void * parameters){
     int motor_temperature_warning = -1;
     int battery_temperature_warning = -1;
     int battery_level_value = -1;
+    int light_blink = 0;
 
     while (1)
     {
@@ -164,9 +170,24 @@ void display_management(void * parameters){
         {
             // do nothing, simply receive all messages
         }
+        // receive messages from auxiliary_light_blink
+        while (rt_mb_recv(&mb_alblink_display, (rt_ubase_t *) (&light_blink), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
 
         // update display information
-        rt_kprintf("\nDISPLAY:: | Speed: %d | Battery: %d\% |\n", speed_value, battery_level_value);
+        rt_kprintf("\nDISPLAY:: | Speed: %d | Battery: %d\% |", speed_value, battery_level_value);
+        if (light_blink)
+        {
+            // auxiliary lights symbol on
+            rt_kprintf(" <--> |\n");
+        }
+        else
+        {
+            // auxiliary lights symbol off
+            rt_kprintf("      |\n");
+        }
 
         // displays warnings if detected
         if (motor_temperature_warning)
@@ -194,7 +215,7 @@ void motor_temperature(void * parameters){
     {
         //rt_kprintf("motor_temperature\n");
 
-        // senses temperature warning
+        // senses motor temperature warning
         if (temperature_warning)
         {
             temperature_warning = 0;
@@ -204,7 +225,7 @@ void motor_temperature(void * parameters){
             temperature_warning = 1;
         }
 
-        // sends temperature warning to display_manager
+        // sends motor temperature warning to display_manager
         rt_mb_send(&mb_mottemp_display, (rt_uint32_t) temperature_warning);
 
         rt_thread_mdelay(1500);
@@ -219,7 +240,7 @@ void battery_temperature(void * parameters){
     {
         //rt_kprintf("battery_temperature\n");
 
-        // senses temperature warning
+        // senses battery temperature warning
         if (temperature_warning)
         {
             temperature_warning = 0;
@@ -229,7 +250,7 @@ void battery_temperature(void * parameters){
             temperature_warning = 1;
         }
 
-        // sends temperature warning to display_manager
+        // sends battery temperature warning to display_manager
         rt_mb_send(&mb_battemp_display, (rt_uint32_t) temperature_warning);
 
         rt_thread_mdelay(1500);
@@ -262,12 +283,80 @@ void battery_level(void * parameters){
 }
 
 void auxiliary_light_management(void * parameters){
+    int light_active = -1;
 
     while (1)
     {
-        rt_kprintf("auxiliary_light_management\n");
+        //rt_kprintf("auxiliary_light_management\n");
+
+        // samples light and sets light_active variable if necessary
+        light_active = EMERGENCY;   // DEBUG VALUE
+
+        // sends light active to blinker
+        if (light_active)
+        {
+            rt_mb_send(&mb_alman_alblink, (rt_uint32_t) 1);
+        }
+        else
+        {
+            rt_mb_send(&mb_alman_alblink, (rt_uint32_t) 0);
+        }
+
 
         rt_thread_mdelay(300);
+    }
+    return;
+}
+
+void auxiliary_light_blink(void * parameters){
+    int blink_mode = -1;
+    int display_blink = 0;
+    //int left_light = 0;
+    //int right_light = 0;
+
+    while (1)
+    {
+        //rt_kprintf("auxiliary_light_blink\n");
+
+        // receive blink mode from auxiliary_light_management
+        while (rt_mb_recv(&mb_alman_alblink, (rt_ubase_t *) (&blink_mode), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+
+        // TO-DO: directly blink LEDs from the board pins
+        switch (blink_mode) {
+            case OFF:
+                // turn off all lights
+                display_blink = 0;
+                break;
+
+            case LEFT:
+                // invert left light status
+                // other lights off
+                display_blink = !display_blink;
+                break;
+
+            case RIGHT:
+                // invert right light status
+                // other lights off
+                display_blink = !display_blink;
+                break;
+
+            case EMERGENCY:
+                // invert all lights value
+                display_blink = !display_blink;
+                break;
+
+            default:
+                // all lights off
+                display_blink = 0;
+                break;
+        }
+        rt_mb_send(&mb_alblink_display, (rt_uint32_t) display_blink);
+
+
+        rt_thread_mdelay(500);
     }
     return;
 }
