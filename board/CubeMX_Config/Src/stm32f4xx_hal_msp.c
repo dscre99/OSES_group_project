@@ -40,6 +40,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include "board.h"
 #include "main.h"
 /* USER CODE BEGIN Includes */
 
@@ -76,7 +77,79 @@
 /* USER CODE END ExternalFunctions */
 
 /* USER CODE BEGIN 0 */
+void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(hadc->Instance==ADC1)
+  {
+  /* USER CODE BEGIN ADC1_MspInit 0 */
 
+  /* USER CODE END ADC1_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_ADC1_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    /**ADC1 GPIO Configuration
+    PA0-WKUP     ------> ADC1_IN0
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN ADC1_MspInit 1 */
+
+  /* USER CODE END ADC1_MspInit 1 */
+  }
+
+}
+void MX_ADC1_Init(ADC_HandleTypeDef* hadc)
+{
+  //ADC_ChannelConfTypeDef sConfig = {0};
+
+  /** Common config
+  */
+  (*hadc).Instance = ADC1;
+  (*hadc).Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  (*hadc).Init.Resolution = ADC_RESOLUTION_6B;
+  (*hadc).Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  (*hadc).Init.ScanConvMode = DISABLE;
+  (*hadc).Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  //hadc.Init.LowPowerAutoWait = DISABLE;
+  (*hadc).Init.ContinuousConvMode = ENABLE;
+  (*hadc).Init.NbrOfConversion = 1;
+  (*hadc).Init.DiscontinuousConvMode = DISABLE;
+  (*hadc).Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  (*hadc).Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  (*hadc).Init.DMAContinuousRequests = DISABLE;
+  //hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  //hadc.Init.OversamplingMode = DISABLE;
+  if (HAL_ADC_Init(hadc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  //sConfig.Channel = ADC_CHANNEL_3;
+  //sConfig.Rank = ADC_REGULAR_RANK_1;
+  //sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  //sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  //sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  //sConfig.Offset = 0;
+  //if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  //{
+  //  Error_Handler();
+  //}
+}
+
+rt_uint32_t get_adc_value(ADC_HandleTypeDef* hadc)
+{
+    HAL_ADC_Start(hadc);
+    HAL_ADC_PollForConversion(hadc, 100);
+
+    return (rt_uint32_t)HAL_ADC_GetValue(hadc);
+}
 /* USER CODE END 0 */
 /**
   * Initializes the Global MSP.

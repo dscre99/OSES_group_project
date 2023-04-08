@@ -11,19 +11,20 @@
 #include <rtthread.h>
 #include <rthw.h>
 #include <board.h>
+#include <main.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 
 #define LED0_PIN    GET_PIN(A, 5)
 #define BUT0_PIN    GET_PIN(C, 13)
-#define SPEED_LIMIT 30
+#define SPEED_LIMIT 200
 #define OFF 0
 #define LEFT 1
 #define RIGHT 2
 #define EMERGENCY 3
 
 #define BUT_THROTTLE    GET_PIN(A, 10)
-#define BUT_BRAKE       GET_PIN(A, 10)
-#define LED_BRAKE       GET_PIN(A, 10)
+#define BUT_BRAKE       GET_PIN(B, 5)
+//#define LED_BRAKE       GET_PIN(A, 10)
 
 
 void print_string(void *parameter)
@@ -62,23 +63,18 @@ void brake_detection(void * parameters){
         {
             // if pin is low it means user engaged the brakes
             //      (button is pressed)
-
-            // brake light goes on
-            rt_pin_write(LED0_PIN, PIN_HIGH);
-            //rt_mb_send(&mb, (rt_uint32_t) 1);
-
             // sends mail to throttle_detection
             rt_mb_send(&mb_brake_throttle, (rt_uint32_t) 1);
+            // sends mail to speed_detection
+            rt_mb_send(&mb_brake_speed, (rt_uint32_t) 1);
             //rt_kprintf("brake_detection: 1\n");
         }
         else
         {
-            // brake light goes off
-            rt_pin_write(LED0_PIN, PIN_LOW);
-            //rt_mb_send(&mb, (rt_uint32_t) 0);
-
             // sends mail to throttle_detection
             rt_mb_send(&mb_brake_throttle, (rt_uint32_t) 0);
+            // sends mail to speed_detection
+            rt_mb_send(&mb_brake_speed, (rt_uint32_t) 0);
             //rt_kprintf("brake_detection: 0\n");
         }
 
@@ -90,45 +86,47 @@ void brake_detection(void * parameters){
 void throttle_detection(void * parameters){
     rt_pin_mode(BUT_THROTTLE, PIN_MODE_INPUT_PULLUP);
 
-    while (1)
-    {
-        if (rt_pin_read(BUT_THROTTLE) != 1)
-        {
-            rt_kprintf("throttle_detection: 1\n");
-        }
-        else
-        {
-            rt_kprintf("throttle_detection: 0\n");
     int brake_detected = 0;
     int speed_value = 0;
 
     while (1)
     {
-        //rt_kprintf("throttle_detection\n");
+        if (rt_pin_read(BUT_THROTTLE) != 1)
+        {
+            //rt_kprintf("throttle_detection\n");
 
-        // receive messages from brake_detection
-        while (rt_mb_recv(&mb_brake_throttle, (rt_ubase_t *) (&brake_detected), RT_WAITING_NO) == RT_EOK)
-        {
-            // do nothing, simply receive all messages
-        }
-        // receive messages from speed_detection
-        while (rt_mb_recv(&mb_speed_throttle, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
-        {
-            // do nothing, simply receive all messages
-        }
+            // receive messages from brake_detection
+            while (rt_mb_recv(&mb_brake_throttle, (rt_ubase_t *) (&brake_detected), RT_WAITING_NO) == RT_EOK)
+            {
+                // do nothing, simply receive all messages
+            }
+            // receive messages from speed_detection
+            while (rt_mb_recv(&mb_speed_throttle, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
+            {
+                // do nothing, simply receive all messages
+            }
 
-        // TO BE COMPLETED
-        if (brake_detected)
-        {
-            // disable motor for safety reason
+            // TO BE COMPLETED
+            if (brake_detected)
+            {
+                // sends mail to speed_detection
+                rt_mb_send(&mb_throttle_speed, (rt_uint32_t) 0);
+
+            }
+            else if (speed_value > SPEED_LIMIT) //???
+            {
+                // disable motor, generates a sort of PWM that acts as speed limiter
+                rt_mb_send(&mb_throttle_speed, (rt_uint32_t) 0);
+            }
+            else
+            {
+                // sends mail to speed_detection
+                rt_mb_send(&mb_throttle_speed, (rt_uint32_t) 1);
+            }
         }
-        else if (speed_value > SPEED_LIMIT)
-        {
-            // disable motor, generates a sort of PWM that acts as speed limiter
-        }
-        else
-        {
-            // set motor power proportional to detected throttle
+        else{
+            // sends mail to speed_detection
+            rt_mb_send(&mb_throttle_speed, (rt_uint32_t) 0);
         }
 
         rt_thread_mdelay(50);
@@ -138,14 +136,55 @@ void throttle_detection(void * parameters){
 
 void speed_detection(void * parameters){
     int speed = 0;
+    int throttle = 0;
+    int brake = 0;
+    int mode = 0;
 
     while (1)
     {
-        //rt_kprintf("speed_detection\n");
 
-        // senses actual speed
-        speed += 1;
-        speed = speed%100;
+        while (rt_mb_recv(&mb_throttle_speed, (rt_ubase_t *) (&throttle), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+        while (rt_mb_recv(&mb_brake_speed, (rt_ubase_t *) (&brake), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+        while (rt_mb_recv(&mb_main_speed, (rt_ubase_t *) (&mode), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+
+        if(brake == 1){
+            speed = speed - 5;
+        }else if(throttle == 1){
+            speed = speed +3;
+        }
+
+        if (mode == 1)
+        {   //uphill road
+            speed = speed - 2;
+            // brake light goes off
+            //rt_pin_write(LED0_PIN, PIN_LOW);
+        }
+        else if (mode == 2)
+        {   //normal road
+            speed = speed - 1;
+            //rt_pin_write(LED0_PIN, PIN_HIGH);
+        }
+        else if (mode == 3)
+        {   //downhill road
+            speed = speed + 2;
+            // brake light goes off
+            //rt_pin_write(LED0_PIN, PIN_LOW);
+        }
+
+        if (speed < 0)
+        {
+            speed = 0;
+        }
+        mode = 0;
         // sends speed value to throttle_detection
         rt_mb_send(&mb_speed_throttle, (rt_uint32_t) speed);
         // sends speed value to display_manager

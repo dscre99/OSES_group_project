@@ -11,12 +11,17 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <board.h>
+#include <main.h>
 #include <stdint.h>
 #include <../custom_flash_func/custom_flash_func.h>
+#include <../libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h>
+#include "../custom_mailbox/custom_mailbox_init.h"
 
 /* defined the PIN */
 #define LED0_PIN    GET_PIN(A, 5)
 #define BUT0_PIN    GET_PIN(C, 13)
+
+ADC_HandleTypeDef hadc1;
 
 int main(void)
 {
@@ -35,22 +40,46 @@ int main(void)
     }
 */
     int count = 1;
+    int mode = 0;
+
     // set LED0 pin mode to output
     rt_pin_mode(LED0_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(BUT0_PIN, PIN_MODE_INPUT);
     rt_pin_write(LED0_PIN, PIN_LOW);
+    //ADC variables
+    rt_uint32_t read_value = 0;
+    //ADC initialization
+    MX_ADC1_Init(&hadc1);
+
 
     while (count++)
     {
        // rt_pin_write(LED0_PIN, PIN_HIGH);
         //rt_thread_mdelay(500);
-        rt_thread_mdelay(50);
+        //rt_thread_mdelay(50);
 
-        if( rt_pin_read(BUT0_PIN)!=1){
-                    rt_pin_write(LED0_PIN, PIN_HIGH);
-        } else {
-            rt_pin_write(LED0_PIN, PIN_LOW);
+        //if( rt_pin_read(BUT0_PIN)!=1){
+        //            rt_pin_write(LED0_PIN, PIN_HIGH);
+        //} else {
+        //    rt_pin_write(LED0_PIN, PIN_LOW);
+        //}
+        read_value = get_adc_value(&hadc1);
+        HAL_ADC_Stop(&hadc1);
+        if (read_value < 22)
+        { //uphill road
+            mode = 1;
         }
+        else if (read_value < 42)
+        { //normal road
+            mode = 2;
+        }
+        else
+        { //downhill road
+            mode = 3;
+        }
+
+        rt_mb_send(&mb_main_speed, (rt_uint32_t) mode);
+        rt_thread_mdelay(3000);
 
     }
 

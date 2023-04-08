@@ -57,7 +57,6 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -71,8 +70,9 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
-
+//void Error_Handler(void);
+rt_uint32_t get_adc_value(ADC_HandleTypeDef* hadc);
+void MX_ADC1_Init(ADC_HandleTypeDef* hadc);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

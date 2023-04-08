@@ -11,11 +11,14 @@
 #define CUSTOM_MAILBOX_CUSTOM_MAILBOX_INIT_H_
 
 extern struct rt_mailbox mb;
+struct rt_mailbox mb_main_speed; //!!
 extern struct rt_mailbox mb_speed_display;
 extern struct rt_mailbox mb_mottemp_display;
 extern struct rt_mailbox mb_battemp_display;
 extern struct rt_mailbox mb_batlevel_display;
 extern struct rt_mailbox mb_brake_throttle;
+extern struct rt_mailbox mb_brake_speed;    //!!
+extern struct rt_mailbox mb_throttle_speed; //!!
 extern struct rt_mailbox mb_speed_throttle;
 extern struct rt_mailbox mb_alman_alblink;
 extern struct rt_mailbox mb_alblink_display;

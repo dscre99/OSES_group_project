@@ -12,21 +12,27 @@
 #include "../custom_mailbox/custom_mailbox_init.h"
 
 struct rt_mailbox mb;
+struct rt_mailbox mb_main_speed; //!!
 struct rt_mailbox mb_speed_display;
 struct rt_mailbox mb_mottemp_display;
 struct rt_mailbox mb_battemp_display;
 struct rt_mailbox mb_batlevel_display;
 struct rt_mailbox mb_brake_throttle;
+struct rt_mailbox mb_brake_speed;    //!!
+struct rt_mailbox mb_throttle_speed; //!!
 struct rt_mailbox mb_speed_throttle;
 struct rt_mailbox mb_alman_alblink;
 struct rt_mailbox mb_alblink_display;
 
 static char mb_pool[128];
+static char mb_main_speed_pool[128]; //!!
 static char mb_speed_display_pool[128];
 static char mb_mottemp_display_pool[16];
 static char mb_battemp_display_pool[16];
 static char mb_batlevel_display_pool[24];
 static char mb_brake_throttle_pool[128];
+static char mb_brake_speed_pool[128];   //!!
+static char mb_throttle_speed_pool[128];   //!!
 static char mb_speed_throttle_pool[128];
 static char mb_alman_alblink_pool[32];
 static char mb_alblink_display_pool[32];
@@ -34,6 +40,18 @@ static char mb_alblink_display_pool[32];
 int custom_mailbox_init(void)
 {
     rt_err_t err_control;
+
+    // initializes main_speed mailbox  !!!!
+        err_control = rt_mb_init(&mb_main_speed,
+                            "mb_main_speed",                      /* Name is mb*/
+                            &mb_main_speed_pool[0],                /* The memory pool used by the mailbox is mb_pool */
+                            sizeof(mb_main_speed_pool) / 4,        /* The number of messages in the mailbox because a message occupies 4 bytes */
+                            RT_IPC_FLAG_FIFO);          /* Thread waiting in FIFO approach */
+        if (err_control != RT_EOK)
+        {
+            rt_kprintf("init receive message mailbox failed.\n");
+            return -1;
+        }
 
     // initializes receive_message mailbox
     err_control = rt_mb_init(&mb,
@@ -107,6 +125,29 @@ int custom_mailbox_init(void)
         return -1;
     }
 
+    // !! initializes brake_detection-speed_detection mailbox !!
+        err_control = rt_mb_init(&mb_brake_speed,
+                            "mb_brake_speed",                    /* Name is mb_brake_throttle*/
+                            &mb_brake_speed_pool,                /* The memory pool used by the mailbox is mb_pool */
+                            sizeof(mb_brake_speed_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
+                            RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+        if (err_control != RT_EOK)
+        {
+            rt_kprintf("init brake_detection-speed_detection mailbox failed.\n");
+            return -1;
+        }
+
+     // !! initializes throttle_detection-speed_detection mailbox !!
+        err_control = rt_mb_init(&mb_throttle_speed,
+                            "mb_throttle_speed",                    /* Name is mb_speed_throttle*/
+                            &mb_throttle_speed_pool,                /* The memory pool used by the mailbox is mb_pool */
+                            sizeof(mb_throttle_speed_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
+                            RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+        if (err_control != RT_EOK)
+        {
+            rt_kprintf("init throttle_detection-speed_detection mailbox failed.\n");
+            return -1;
+        }
     // initializes speed_detection-throttle_detection mailbox
     err_control = rt_mb_init(&mb_speed_throttle,
                         "mb_speed_throttle",                    /* Name is mb_speed_throttle*/
