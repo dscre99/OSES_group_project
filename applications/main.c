@@ -19,7 +19,7 @@
 
 /* defined the PIN */
 #define LED0_PIN    GET_PIN(A, 5)
-#define BUT0_PIN    GET_PIN(C, 13)
+//#define BUT0_PIN    GET_PIN(C, 13)
 
 ADC_HandleTypeDef hadc1;
 
@@ -42,10 +42,15 @@ int main(void)
     int count = 1;
     int mode = 0;
 
-    // set LED0 pin mode to output
-    rt_pin_mode(LED0_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(BUT0_PIN, PIN_MODE_INPUT);
-    rt_pin_write(LED0_PIN, PIN_LOW);
+    // set PIN mode
+    rt_pin_mode(BUT_BRAKE, PIN_MODE_INPUT_PULLUP);
+    rt_pin_mode(BUT_THROTTLE, PIN_MODE_INPUT_PULLUP);
+    rt_pin_mode(LED_LEFT, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED_RIGHT, PIN_MODE_OUTPUT);
+    //rt_pin_mode(LED0_PIN, PIN_MODE_OUTPUT);
+    //rt_pin_mode(BUT0_PIN, PIN_MODE_INPUT);
+    //rt_pin_write(LED0_PIN, PIN_LOW);
+
     //ADC variables
     rt_uint32_t read_value = 0;
     //ADC initialization
@@ -54,15 +59,6 @@ int main(void)
 
     while (count++)
     {
-       // rt_pin_write(LED0_PIN, PIN_HIGH);
-        //rt_thread_mdelay(500);
-        //rt_thread_mdelay(50);
-
-        //if( rt_pin_read(BUT0_PIN)!=1){
-        //            rt_pin_write(LED0_PIN, PIN_HIGH);
-        //} else {
-        //    rt_pin_write(LED0_PIN, PIN_LOW);
-        //}
         read_value = get_adc_value(&hadc1);
         HAL_ADC_Stop(&hadc1);
         if (read_value < 22)
@@ -80,7 +76,6 @@ int main(void)
 
         rt_mb_send(&mb_main_speed, (rt_uint32_t) mode);
         rt_thread_mdelay(3000);
-
     }
 
     return RT_EOK;

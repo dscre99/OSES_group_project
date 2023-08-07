@@ -18,11 +18,13 @@ struct rt_mailbox mb_mottemp_display;
 struct rt_mailbox mb_battemp_display;
 struct rt_mailbox mb_batlevel_display;
 struct rt_mailbox mb_brake_throttle;
+struct rt_mailbox mb_brake_alman;    //!!
 struct rt_mailbox mb_brake_speed;    //!!
 struct rt_mailbox mb_throttle_speed; //!!
 struct rt_mailbox mb_speed_throttle;
-struct rt_mailbox mb_alman_alblink;
-struct rt_mailbox mb_alblink_display;
+//struct rt_mailbox mb_alman_alblink;
+struct rt_mailbox mb_alman_display;   //!!
+//struct rt_mailbox mb_alblink_display;
 
 static char mb_pool[128];
 static char mb_main_speed_pool[128]; //!!
@@ -31,11 +33,13 @@ static char mb_mottemp_display_pool[16];
 static char mb_battemp_display_pool[16];
 static char mb_batlevel_display_pool[24];
 static char mb_brake_throttle_pool[128];
+static char mb_brake_alman_pool[128];   //!!
 static char mb_brake_speed_pool[128];   //!!
 static char mb_throttle_speed_pool[128];   //!!
 static char mb_speed_throttle_pool[128];
-static char mb_alman_alblink_pool[32];
-static char mb_alblink_display_pool[32];
+//static char mb_alman_alblink_pool[32];
+static char mb_alman_display_pool[32];  //!!
+//static char mb_alblink_display_pool[32];
 
 int custom_mailbox_init(void)
 {
@@ -125,6 +129,18 @@ int custom_mailbox_init(void)
         return -1;
     }
 
+    // !! initializes brake_detection-throttle_detection mailbox!!
+        err_control = rt_mb_init(&mb_brake_alman,
+                            "mb_brake_alman",                    /* Name is mb_brake_throttle*/
+                            &mb_brake_alman_pool,                /* The memory pool used by the mailbox is mb_pool */
+                            sizeof(mb_brake_alman_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
+                            RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+        if (err_control != RT_EOK)
+        {
+            rt_kprintf("init brake_detection-auxiliary_light_management mailbox failed.\n");
+            return -1;
+        }
+
     // !! initializes brake_detection-speed_detection mailbox !!
         err_control = rt_mb_init(&mb_brake_speed,
                             "mb_brake_speed",                    /* Name is mb_brake_throttle*/
@@ -161,28 +177,40 @@ int custom_mailbox_init(void)
     }
 
     // initializes auxiliary_light_management-auxiliary_light_blink mailbox
-    err_control = rt_mb_init(&mb_alman_alblink,
-                        "mb_alman_alblink",                     /* Name is mb_alman_alblink*/
-                        &mb_alman_alblink_pool,                 /* The memory pool used by the mailbox is mb_pool */
-                        sizeof(mb_alman_alblink_pool) / 4,      /* The number of messages in the mailbox because a message occupies 4 bytes */
-                        RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+    /*err_control = rt_mb_init(&mb_alman_alblink,
+                        "mb_alman_alblink",                     // Name is mb_alman_alblink
+                        &mb_alman_alblink_pool,                 // The memory pool used by the mailbox is mb_pool
+                        sizeof(mb_alman_alblink_pool) / 4,      // The number of messages in the mailbox because a message occupies 4 bytes
+                        RT_IPC_FLAG_FIFO);                      // Thread waiting in FIFO approach
     if (err_control != RT_EOK)
     {
         rt_kprintf("init auxiliary_light_management-auxiliary_light_blink mailbox failed.\n");
         return -1;
-    }
+    }*/
+
+    // !! initializes auxiliary_light_management-display_management mailbox !!
+       err_control = rt_mb_init(&mb_alman_display,
+                           "mb_alman_display",                  /* Name is mb_alblink_display*/
+                           &mb_alman_display_pool,              /* The memory pool used by the mailbox is mb_pool */
+                           sizeof(mb_alman_display_pool) / 4,   /* The number of messages in the mailbox because a message occupies 4 bytes */
+                           RT_IPC_FLAG_FIFO);                     /* Thread waiting in FIFO approach */
+       if (err_control != RT_EOK)
+       {
+           rt_kprintf("init auxiliary_light_management-display_management mailbox failed.\n");
+           return -1;
+       }
 
     // initializes auxiliary_light_blink-display_management mailbox
-    err_control = rt_mb_init(&mb_alblink_display,
-                        "mb_alblink_display",                  /* Name is mb_alblink_display*/
-                        &mb_alblink_display_pool,              /* The memory pool used by the mailbox is mb_pool */
-                        sizeof(mb_alblink_display_pool) / 4,   /* The number of messages in the mailbox because a message occupies 4 bytes */
-                        RT_IPC_FLAG_FIFO);                     /* Thread waiting in FIFO approach */
+    /*err_control = rt_mb_init(&mb_alblink_display,
+                        "mb_alblink_display",                  // Name is mb_alblink_display
+                        &mb_alblink_display_pool,              // The memory pool used by the mailbox is mb_pool
+                        sizeof(mb_alblink_display_pool) / 4,   // The number of messages in the mailbox because a message occupies 4 bytes
+                        RT_IPC_FLAG_FIFO);                     // Thread waiting in FIFO approach
     if (err_control != RT_EOK)
     {
         rt_kprintf("init auxiliary_light_blink-display_management mailbox failed.\n");
         return -1;
-    }
+    }*/
 
     return 0;
 }

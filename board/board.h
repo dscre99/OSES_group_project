@@ -16,6 +16,12 @@
 #include "drv_common.h"
 #include "drv_gpio.h"
 
+#define BUT_THROTTLE    GET_PIN(A, 10)
+#define BUT_BRAKE       GET_PIN(B, 5)
+#define BUT_EMERGENCY   GET_PIN(C, 13)
+#define LED_RIGHT      GET_PIN(A, 8)
+#define LED_LEFT       GET_PIN(A, 9)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
