@@ -13,7 +13,9 @@
 
 struct rt_mailbox mb;
 struct rt_mailbox mb_main_speed; //!!
+struct rt_mailbox mb_main_throttle; //!!
 struct rt_mailbox mb_speed_display;
+struct rt_mailbox mb_throttle_display; //!!
 struct rt_mailbox mb_mottemp_display;
 struct rt_mailbox mb_battemp_display;
 struct rt_mailbox mb_batlevel_display;
@@ -28,7 +30,9 @@ struct rt_mailbox mb_alman_display;   //!!
 
 static char mb_pool[128];
 static char mb_main_speed_pool[128]; //!!
+static char mb_main_throttle_pool[128]; //!!
 static char mb_speed_display_pool[128];
+static char mb_throttle_display_pool[128]; //!!
 static char mb_mottemp_display_pool[16];
 static char mb_battemp_display_pool[16];
 static char mb_batlevel_display_pool[24];
@@ -57,6 +61,18 @@ int custom_mailbox_init(void)
             return -1;
         }
 
+        // initializes main_throttle mailbox  !!!!
+            err_control = rt_mb_init(&mb_main_throttle,
+                                "mb_main_throttle",                      /* Name is mb*/
+                                &mb_main_throttle_pool[0],                /* The memory pool used by the mailbox is mb_pool */
+                                sizeof(mb_main_throttle_pool) / 4,        /* The number of messages in the mailbox because a message occupies 4 bytes */
+                                RT_IPC_FLAG_FIFO);          /* Thread waiting in FIFO approach */
+            if (err_control != RT_EOK)
+            {
+                rt_kprintf("init receive message mailbox failed.\n");
+                return -1;
+            }
+
     // initializes receive_message mailbox
     err_control = rt_mb_init(&mb,
                         "mb",                      /* Name is mb*/
@@ -80,6 +96,18 @@ int custom_mailbox_init(void)
         rt_kprintf("init speed_detection-display_manager mailbox failed.\n");
         return -1;
     }
+
+    // initializes throttle_detection-display_management mailbox
+        err_control = rt_mb_init(&mb_throttle_display,
+                            "mb_throttle_display",                     /* Name is mb_speed_display*/
+                            &mb_throttle_display_pool[0],              /* The memory pool used by the mailbox is mb_pool */
+                            sizeof(mb_throttle_display_pool) / 4,      /* The number of messages in the mailbox because a message occupies 4 bytes */
+                            RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+        if (err_control != RT_EOK)
+        {
+            rt_kprintf("init throttle_detection-display_manager mailbox failed.\n");
+            return -1;
+        }
 
     // initializes motor_temperature-display_management mailbox
     err_control = rt_mb_init(&mb_mottemp_display,
