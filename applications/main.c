@@ -13,7 +13,7 @@
 #include <board.h>
 #include <main.h>
 #include <stdint.h>
-#include <../custom_flash_func/custom_flash_func.h>
+//#include <../custom_flash_func/custom_flash_func.h>
 #include <../libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 
