@@ -65,26 +65,26 @@ void receive_message(void *parameter)
 
 void brake_detection(void * parameters){
     //rt_pin_mode(BUT_BRAKE, PIN_MODE_INPUT_PULLUP);
-    rt_uint32_t brake_status = 0;
+    int brake_status = 0;
 
     while(1){
         if (rt_pin_read(BUT_BRAKE) != 1)
         {
             // if pin is low it means user engaged the brakes
                 //      (button is pressed)
-            brake_status = (rt_uint32_t) 1;
+            brake_status = 1;
         }
         else
         {
-            brake_status = (rt_uint32_t) 0;
+            brake_status = 0;
         }
 
         // sends mail to throttle_detection
-        rt_mb_send(&mb_brake_throttle, brake_status);
+        rt_mb_send(&mb_brake_throttle, (rt_uint32_t)brake_status);
         // sends mail to speed_detection
-        rt_mb_send(&mb_brake_speed, brake_status);
+        rt_mb_send(&mb_brake_speed, (rt_uint32_t)brake_status);
         // sends mail to auxiliary_light_management
-        rt_mb_send(&mb_brake_alman, brake_status);
+        rt_mb_send(&mb_brake_alman, (rt_uint32_t)brake_status);
 
         rt_thread_mdelay(25);
     }

@@ -152,7 +152,7 @@ int custom_mailbox_init(void)
     // initializes brake_detection-throttle_detection mailbox
     err_control = rt_mb_init(&mb_brake_throttle,
                         "mb_brake_throttle",                    /* Name is mb_brake_throttle*/
-                        &mb_brake_throttle_pool,                /* The memory pool used by the mailbox is mb_pool */
+                        &mb_brake_throttle_pool[0],                /* The memory pool used by the mailbox is mb_pool */
                         sizeof(mb_brake_throttle_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
                         RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
     if (err_control != RT_EOK)
@@ -164,7 +164,7 @@ int custom_mailbox_init(void)
     // !! initializes brake_detection-throttle_detection mailbox!!
         err_control = rt_mb_init(&mb_brake_alman,
                             "mb_brake_alman",                    /* Name is mb_brake_throttle*/
-                            &mb_brake_alman_pool,                /* The memory pool used by the mailbox is mb_pool */
+                            &mb_brake_alman_pool[0],                /* The memory pool used by the mailbox is mb_pool */
                             sizeof(mb_brake_alman_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
                             RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
         if (err_control != RT_EOK)
@@ -176,7 +176,7 @@ int custom_mailbox_init(void)
     // !! initializes brake_detection-speed_detection mailbox !!
         err_control = rt_mb_init(&mb_brake_speed,
                             "mb_brake_speed",                    /* Name is mb_brake_throttle*/
-                            &mb_brake_speed_pool,                /* The memory pool used by the mailbox is mb_pool */
+                            &mb_brake_speed_pool[0],                /* The memory pool used by the mailbox is mb_pool */
                             sizeof(mb_brake_speed_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
                             RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
         if (err_control != RT_EOK)
@@ -247,7 +247,7 @@ int custom_mailbox_init(void)
     // initializes throttle_detection-motor_temperature mailbox
     err_control = rt_mb_init(&mb_throttle_mottemp,
                      "mb_throttle_mottemp",                    /* Name is mb_throttle_mottemp*/
-                     &mb_throttle_mottemp,                     /* The memory pool used by the mailbox is mb_throttle_mottemp_pool */
+                     &mb_throttle_mottemp_pool,                     /* The memory pool used by the mailbox is mb_throttle_mottemp_pool */
                      sizeof(mb_throttle_mottemp_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
                      RT_IPC_FLAG_FIFO);                        /* Thread waiting in FIFO approach */
     if (err_control != RT_EOK)
@@ -260,7 +260,7 @@ int custom_mailbox_init(void)
     // initializes throttle_detection-battery_temperature mailbox
     err_control = rt_mb_init(&mb_throttle_battemp,
                        "mb_throttle_battemp",                    /* Name is mb_throttle_battemp*/
-                       &mb_throttle_battemp,                     /* The memory pool used by the mailbox is mb_throttle_battemp_pool */
+                       &mb_throttle_battemp_pool,                     /* The memory pool used by the mailbox is mb_throttle_battemp_pool */
                        sizeof(mb_throttle_battemp_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
                        RT_IPC_FLAG_FIFO);                        /* Thread waiting in FIFO approach */
     if (err_control != RT_EOK)
