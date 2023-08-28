@@ -27,6 +27,7 @@ ADC_HandleTypeDef hadc1;
 #define ALL_ON 1
 #define LEFT 2
 #define RIGHT 3
+#define BRAKE 4
 #define AMBIENT_TEMP 25
 
 //#define BUT_THROTTLE    GET_PIN(A, 10)
@@ -64,30 +65,26 @@ void receive_message(void *parameter)
 
 void brake_detection(void * parameters){
     //rt_pin_mode(BUT_BRAKE, PIN_MODE_INPUT_PULLUP);
+    rt_uint32_t brake_status = 0;
 
     while(1){
         if (rt_pin_read(BUT_BRAKE) != 1)
         {
             // if pin is low it means user engaged the brakes
-            //      (button is pressed)
-            // sends mail to throttle_detection
-            rt_mb_send(&mb_brake_throttle, (rt_uint32_t) 1);
-            // sends mail to speed_detection
-            rt_mb_send(&mb_brake_speed, (rt_uint32_t) 1);
-            // sends mail to auxiliary_light_management
-            rt_mb_send(&mb_brake_alman, (rt_uint32_t) 1);
-            //rt_kprintf("brake_detection: 1\n");
+                //      (button is pressed)
+            brake_status = (rt_uint32_t) 1;
         }
         else
         {
-            // sends mail to throttle_detection
-            rt_mb_send(&mb_brake_throttle, (rt_uint32_t) 0);
-            // sends mail to speed_detection
-            rt_mb_send(&mb_brake_speed, (rt_uint32_t) 0);
-            // sends mail to auxiliary_light_management
-            rt_mb_send(&mb_brake_alman, (rt_uint32_t) 0);
-            //rt_kprintf("brake_detection: 0\n");
+            brake_status = (rt_uint32_t) 0;
         }
+
+        // sends mail to throttle_detection
+        rt_mb_send(&mb_brake_throttle, brake_status);
+        // sends mail to speed_detection
+        rt_mb_send(&mb_brake_speed, brake_status);
+        // sends mail to auxiliary_light_management
+        rt_mb_send(&mb_brake_alman, brake_status);
 
         rt_thread_mdelay(25);
     }
@@ -108,9 +105,10 @@ void throttle_detection(void * parameters){
 
         while (rt_mb_recv(&mb_main_throttle, (rt_ubase_t *) (&read_value), RT_WAITING_NO) == RT_EOK)
         {
-                    // do nothing, simply receive all messages
+            // do nothing, simply receive all messages
         }
         throttle=(MAX_THROTTLE*read_value)/MAX_ADC;
+
         // receive messages from brake_detection
         while (rt_mb_recv(&mb_brake_throttle, (rt_ubase_t *) (&brake_detected), RT_WAITING_NO) == RT_EOK)
         {
@@ -152,6 +150,7 @@ void speed_detection(void * parameters){
     //int throttle = 0;
     int brake = 0;
     //int mode = 0;
+
     while (1)
     {
         /*while (rt_mb_recv(&mb_throttle_speed, (rt_ubase_t *) (&throttle), RT_WAITING_NO) == RT_EOK)
@@ -197,6 +196,7 @@ void speed_detection(void * parameters){
             speed = 0;
         }*/
         //mode = 0;
+
         // sends speed value to throttle_detection
         rt_mb_send(&mb_speed_throttle, (rt_uint32_t) speed);
         // sends speed value to display_manager
@@ -257,18 +257,23 @@ void display_management(void * parameters){
 
         // update display information
         rt_kprintf("\nDISPLAY:: | Speed: %2d | Throttle: %3d | Battery: %3d\% |", speed_value, throttle_value, battery_level_value);
-        if (light_blink==ALL_ON){
+        if (light_blink == ALL_ON){
             // auxiliary lights symbol on
-            rt_kprintf(" <--> |\n");
-        }else if (light_blink==LEFT){
+            rt_kprintf(" <--> |");
+        }else if (light_blink == LEFT){
             // auxiliary left light symbol on
-            rt_kprintf(" <-   |\n");
-        }else if (light_blink==RIGHT){
+            rt_kprintf(" <-   |");
+        }else if (light_blink == RIGHT){
             // auxiliary right light symbol on
-            rt_kprintf("   -> |\n");
+            rt_kprintf("   -> |");
         }else{
             // auxiliary lights symbol off
-            rt_kprintf("      |\n");
+            rt_kprintf("      |");
+        }
+        if (light_blink == BRAKE) {
+            rt_kprintf(" BRAKE! |\n");
+        } else {
+            rt_kprintf("        |\n");
         }
 
         // displays warnings if detected
@@ -446,7 +451,7 @@ void auxiliary_light_management(void * parameters){
             // BRAKE: turn on all lights
             rt_pin_write(LED_RIGHT, PIN_HIGH);
             rt_pin_write(LED_LEFT, PIN_HIGH);
-            display_blink = ALL_ON;
+            display_blink = BRAKE;
         }else if (left_but == 1) {
             // LEFT LIGHT
             rt_pin_write(LED_RIGHT, PIN_LOW);
