@@ -23,11 +23,10 @@ ADC_HandleTypeDef hadc1;
 #define MAX_THROTTLE 100
 #define MAX_SPEED 99
 #define MAX_ADC 63
-//#define OFF 0
-//#define BRAKE 1
-//#define LEFT 2
-//#define RIGHT 3
-//#define EMERGENCY 4
+#define ALL_OFF 0
+#define ALL_ON 1
+#define LEFT 2
+#define RIGHT 3
 #define AMBIENT_TEMP 25
 
 //#define BUT_THROTTLE    GET_PIN(A, 10)
@@ -105,48 +104,42 @@ void throttle_detection(void * parameters){
 
     while (1)
     {
-        //if (rt_pin_read(BUT_THROTTLE) != 1)
-        //{
-            //rt_kprintf("throttle_detection\n");
+        //rt_kprintf("throttle_detection\n");
 
-            while (rt_mb_recv(&mb_main_throttle, (rt_ubase_t *) (&read_value), RT_WAITING_NO) == RT_EOK)
-            {
-                        // do nothing, simply receive all messages
-            }
-            throttle=(MAX_THROTTLE*read_value)/MAX_ADC;
-            // receive messages from brake_detection
-            while (rt_mb_recv(&mb_brake_throttle, (rt_ubase_t *) (&brake_detected), RT_WAITING_NO) == RT_EOK)
-            {
-                // do nothing, simply receive all messages
-            }
-            // receive messages from speed_detection
-            while (rt_mb_recv(&mb_speed_throttle, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
-            {
-                // do nothing, simply receive all messages
-            }
+        while (rt_mb_recv(&mb_main_throttle, (rt_ubase_t *) (&read_value), RT_WAITING_NO) == RT_EOK)
+        {
+                    // do nothing, simply receive all messages
+        }
+        throttle=(MAX_THROTTLE*read_value)/MAX_ADC;
+        // receive messages from brake_detection
+        while (rt_mb_recv(&mb_brake_throttle, (rt_ubase_t *) (&brake_detected), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+        // receive messages from speed_detection
+        while (rt_mb_recv(&mb_speed_throttle, (rt_ubase_t *) (&speed_value), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
 
-            // TO BE COMPLETED
-            if (brake_detected)
-            {
-                // sends mail to speed_detection
-                rt_mb_send(&mb_throttle_display, (rt_uint32_t) 0);
+        // throttle management
+        if (brake_detected)
+        {
+            // disable motor in case brake is applied
+            throttle = 0;
+        }
+        else if (speed_value > SPEED_LIMIT)
+        {
+            // disable motor in case speed limit is reached
+            throttle = 0;
+        }
 
-            }
-            else if (speed_value > SPEED_LIMIT)
-            {
-                // disable motor
-                rt_mb_send(&mb_throttle_display, (rt_uint32_t) 0);
-            }
-            else
-            {
-                // sends mail to speed_detection
-                rt_mb_send(&mb_throttle_display, (rt_uint32_t) throttle);
-            }
-        //}
-        //else{
-            // sends mail to speed_detection
-            //rt_mb_send(&mb_throttle_speed, (rt_uint32_t) 0);
-        //}
+        // sends mail to speed_detection
+        rt_mb_send(&mb_throttle_display, (rt_uint32_t) throttle);
+        // sends mail to motor_temperature
+        rt_mb_send(&mb_throttle_mottemp, (rt_uint32_t) throttle);
+        // sends mail to battery_temperature
+        rt_mb_send(&mb_throttle_battemp, (rt_uint32_t) throttle);
 
         rt_thread_mdelay(50);
     }
@@ -208,7 +201,6 @@ void speed_detection(void * parameters){
         rt_mb_send(&mb_speed_throttle, (rt_uint32_t) speed);
         // sends speed value to display_manager
         rt_mb_send(&mb_speed_display, (rt_uint32_t) speed);
-        rt_mb_send(&mb_speed_battemp, (rt_uint32_t) speed);
 
         rt_thread_mdelay(50);
     }
@@ -265,13 +257,13 @@ void display_management(void * parameters){
 
         // update display information
         rt_kprintf("\nDISPLAY:: | Speed: %2d | Throttle: %3d | Battery: %3d\% |", speed_value, throttle_value, battery_level_value);
-        if (light_blink==1){
+        if (light_blink==ALL_ON){
             // auxiliary lights symbol on
             rt_kprintf(" <--> |\n");
-        }else if (light_blink==2){
+        }else if (light_blink==LEFT){
             // auxiliary left light symbol on
             rt_kprintf(" <-   |\n");
-        }else if (light_blink==3){
+        }else if (light_blink==RIGHT){
             // auxiliary right light symbol on
             rt_kprintf("   -> |\n");
         }else{
@@ -299,27 +291,42 @@ void display_management(void * parameters){
 }
 
 void motor_temperature(void * parameters){
-    int temperature_warning = 0;
+    int temperature_warning = AMBIENT_TEMP;
+    rt_uint32_t received_throttle = 0;
 
     while (1)
     {
         //rt_kprintf("motor_temperature\n");
+        while (rt_mb_recv(&mb_throttle_mottemp, (rt_ubase_t *) (&received_throttle), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+
+        // performs emulation of motor temperature based on throttle
+        if(received_throttle >= 0.75*MAX_THROTTLE){
+            if (temperature_warning < AMBIENT_TEMP+50) {
+                temperature_warning += 1;
+            }
+        } else if (received_throttle <= 0.25*MAX_THROTTLE) {
+            if (temperature_warning > AMBIENT_TEMP) {
+                temperature_warning -= 1;
+            }
+        }
 
         // senses motor temperature warning
-        if (temperature_warning == 20) //temperature warning about every 30 sec
+        if (temperature_warning >= 50) //temperature warning about every 30 sec
         {
-            temperature_warning = 0;
             // sends motor temperature warning to display_manager
             rt_mb_send(&mb_mottemp_display, (rt_uint32_t) 1);
         }
         else
         {
-            temperature_warning += 1;
             rt_mb_send(&mb_mottemp_display, (rt_uint32_t) 0);
         }
 
         rt_thread_mdelay(1500);
     }
+
     return;
 }
 
@@ -337,7 +344,9 @@ void battery_temperature(void * parameters){
 
         // performs emulation of battery temperature based on throttle
         if(received_throttle >= 0.75*MAX_THROTTLE){
-            temperature_warning += 2;
+            if (temperature_warning < AMBIENT_TEMP+50) {
+                temperature_warning += 2;
+            }
         } else if (received_throttle <= 0.25*MAX_THROTTLE) {
             if (temperature_warning > AMBIENT_TEMP) {
                 temperature_warning -= 2;
@@ -357,6 +366,7 @@ void battery_temperature(void * parameters){
 
         rt_thread_mdelay(1500);
     }
+
     return;
 }
 
@@ -395,6 +405,7 @@ void auxiliary_light_management(void * parameters){
     while (1)
     {
         //rt_kprintf("auxiliary_light_management\n");
+
         // receive brake press from brake_detection
         while (rt_mb_recv(&mb_brake_alman, (rt_ubase_t *) (&brake_detected), RT_WAITING_NO) == RT_EOK)
         {
@@ -431,32 +442,29 @@ void auxiliary_light_management(void * parameters){
             rt_pin_write(LED_RIGHT, !rt_pin_read(LED_RIGHT));
             rt_pin_write(LED_LEFT, !rt_pin_read(LED_LEFT));
             display_blink = !display_blink;
-            rt_mb_send(&mb_alman_display, (rt_uint32_t) display_blink);
         }else if (brake_detected == 1) {
             // BRAKE: turn on all lights
             rt_pin_write(LED_RIGHT, PIN_HIGH);
             rt_pin_write(LED_LEFT, PIN_HIGH);
-            display_blink = 1;
-            rt_mb_send(&mb_alman_display, (rt_uint32_t) display_blink);
+            display_blink = ALL_ON;
         }else if (left_but == 1) {
             // LEFT LIGHT
             rt_pin_write(LED_RIGHT, PIN_LOW);
             rt_pin_write(LED_LEFT, !rt_pin_read(LED_LEFT));
-            display_blink = 2;
-            rt_mb_send(&mb_alman_display, (rt_uint32_t) display_blink);
+            display_blink = LEFT;
         }else if (right_but == 1) {
             // RIGHT LIGHT
             rt_pin_write(LED_RIGHT, !rt_pin_read(LED_RIGHT));
             rt_pin_write(LED_LEFT, PIN_LOW);
-            display_blink = 3;
-            rt_mb_send(&mb_alman_display, (rt_uint32_t) display_blink);
+            display_blink = RIGHT;
         }else {
             // LIGHTS_OFF: turn off all lights
             rt_pin_write(LED_RIGHT, PIN_LOW);
             rt_pin_write(LED_LEFT, PIN_LOW);
-            display_blink = 0;
-            rt_mb_send(&mb_alman_display, (rt_uint32_t) 0);
+            display_blink = ALL_OFF;
         }
+
+        rt_mb_send(&mb_alman_display, (rt_uint32_t) display_blink);
 
         // sends light active to blinker
         //if (light_active)
