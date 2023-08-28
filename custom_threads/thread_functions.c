@@ -28,6 +28,7 @@ ADC_HandleTypeDef hadc1;
 //#define LEFT 2
 //#define RIGHT 3
 //#define EMERGENCY 4
+#define AMBIENT_TEMP 25
 
 //#define BUT_THROTTLE    GET_PIN(A, 10)
 //#define BUT_BRAKE       GET_PIN(B, 5)
@@ -207,6 +208,7 @@ void speed_detection(void * parameters){
         rt_mb_send(&mb_speed_throttle, (rt_uint32_t) speed);
         // sends speed value to display_manager
         rt_mb_send(&mb_speed_display, (rt_uint32_t) speed);
+        rt_mb_send(&mb_speed_battemp, (rt_uint32_t) speed);
 
         rt_thread_mdelay(50);
     }
@@ -262,7 +264,7 @@ void display_management(void * parameters){
         }
 
         // update display information
-        rt_kprintf("\nDISPLAY:: | Speed: %d | Throttle: %d | Battery: %d\% |", speed_value, throttle_value, battery_level_value);
+        rt_kprintf("\nDISPLAY:: | Speed: %2d | Throttle: %3d | Battery: %3d\% |", speed_value, throttle_value, battery_level_value);
         if (light_blink==1){
             // auxiliary lights symbol on
             rt_kprintf(" <--> |\n");
@@ -322,22 +324,32 @@ void motor_temperature(void * parameters){
 }
 
 void battery_temperature(void * parameters){
-    int temperature_warning = 0;
+    int temperature_warning = AMBIENT_TEMP;
+    rt_uint32_t received_throttle = 0;
 
     while (1)
     {
         //rt_kprintf("battery_temperature\n");
+        while (rt_mb_recv(&mb_throttle_battemp, (rt_ubase_t *) (&received_throttle), RT_WAITING_NO) == RT_EOK)
+        {
+            // do nothing, simply receive all messages
+        }
+
+        // performs emulation of battery temperature based on throttle
+        if(received_throttle >= 0.75*MAX_THROTTLE){
+            temperature_warning += 2;
+        } else if (received_throttle <= 0.25*MAX_THROTTLE) {
+            temperature_warning -= 2;
+        }
 
         // senses battery temperature warning
-        if (temperature_warning == 20) //temperature warning about every 30 sec
+        if (temperature_warning >= 45) //temperature warning about every 30 sec
         {
-            temperature_warning = 0;
             // sends battery temperature warning to display_manager
             rt_mb_send(&mb_battemp_display, (rt_uint32_t) 1);
         }
         else
         {
-            temperature_warning += 1;
             rt_mb_send(&mb_battemp_display, (rt_uint32_t) 0);
         }
 

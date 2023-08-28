@@ -26,6 +26,7 @@ extern struct rt_mailbox mb_speed_throttle;
 //extern struct rt_mailbox mb_alman_alblink;
 extern struct rt_mailbox mb_alman_display; //!!
 //extern struct rt_mailbox mb_alblink_display;
+extern struct rt_mailbox mb_throttle_battemp;
 
 int custom_mailbox_init(void);
 

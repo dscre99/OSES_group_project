@@ -27,6 +27,7 @@ struct rt_mailbox mb_speed_throttle;
 //struct rt_mailbox mb_alman_alblink;
 struct rt_mailbox mb_alman_display;   //!!
 //struct rt_mailbox mb_alblink_display;
+struct rt_mailbox mb_throttle_battemp;
 
 static char mb_pool[128];
 static char mb_main_speed_pool[128]; //!!
@@ -44,6 +45,7 @@ static char mb_speed_throttle_pool[128];
 //static char mb_alman_alblink_pool[32];
 static char mb_alman_display_pool[32];  //!!
 //static char mb_alblink_display_pool[32];
+static char mb_throttle_battemp_pool[128];
 
 int custom_mailbox_init(void)
 {
@@ -239,6 +241,18 @@ int custom_mailbox_init(void)
         rt_kprintf("init auxiliary_light_blink-display_management mailbox failed.\n");
         return -1;
     }*/
+
+   // initializes throttle_detection-battery_temperature mailbox
+       err_control = rt_mb_init(&mb_throttle_batttemp,
+                           "mb_throttle_batttemp",                    /* Name is mb_speed_throttle*/
+                           &mb_throttle_batttemp,                /* The memory pool used by the mailbox is mb_pool */
+                           sizeof(mb_throttle_batttemp_pool) / 4,     /* The number of messages in the mailbox because a message occupies 4 bytes */
+                           RT_IPC_FLAG_FIFO);                      /* Thread waiting in FIFO approach */
+       if (err_control != RT_EOK)
+       {
+           rt_kprintf("init throttle_detection-battery_temperature mailbox failed.\n");
+           return -1;
+       }
 
     return 0;
 }
