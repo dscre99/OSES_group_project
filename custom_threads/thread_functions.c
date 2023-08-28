@@ -339,7 +339,9 @@ void battery_temperature(void * parameters){
         if(received_throttle >= 0.75*MAX_THROTTLE){
             temperature_warning += 2;
         } else if (received_throttle <= 0.25*MAX_THROTTLE) {
-            temperature_warning -= 2;
+            if (temperature_warning > AMBIENT_TEMP) {
+                temperature_warning -= 2;
+            }
         }
 
         // senses battery temperature warning
