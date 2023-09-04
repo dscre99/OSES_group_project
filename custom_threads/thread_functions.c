@@ -30,33 +30,6 @@ ADC_HandleTypeDef hadc1;
 #define BRAKE 4
 #define AMBIENT_TEMP 25
 
-void print_string(void *parameter)
-{
-    rt_kprintf("\nThread 'print_string' activated\n");
-
-    rt_kprintf("\nTHIS IS A TEST STRING\n");
-
-    rt_kprintf("\nThread 'print_string' terminating...\n");
-}
-
-void receive_message(void *parameter)
-{
-    int received_val = 0;
-
-    rt_kprintf("\n---- receive_message_thread started ----\n\n");
-
-    while(1)
-    {
-
-        /* Receive messages from the message queue */
-        if (rt_mb_recv(&mb, (rt_ubase_t *)(&received_val), RT_WAITING_FOREVER) == RT_EOK)
-        {
-            rt_kprintf("\rreceive_message: recv msg from msg queue, the content:%d ", received_val);
-        }
-        rt_thread_mdelay(5);
-    }
-}
-
 void brake_detection(void * parameters){
     int brake_status = 0;
 
