@@ -12,6 +12,7 @@
 #include <rthw.h>
 #include <board.h>
 #include <main.h>
+#include <cpu_usage.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 
 #define LED0_PIN    GET_PIN(A, 5)
@@ -91,6 +92,10 @@ void brake_detection(void * parameters){
 void throttle_detection(void * parameters){
     //rt_pin_mode(BUT_THROTTLE, PIN_MODE_INPUT_PULLUP);
 
+    float load;
+    cpu_usage_init();
+
+
     int brake_detected = 0;
     int speed_value = 0;
 
@@ -136,6 +141,11 @@ void throttle_detection(void * parameters){
 
         rt_thread_mdelay(50);
     }
+
+    load = cpu_load_average();
+    rt_kprintf("cpu load average: %f\n", load);
+
+
     return;
 }
 
