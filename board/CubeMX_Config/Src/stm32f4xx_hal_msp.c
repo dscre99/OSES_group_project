@@ -92,7 +92,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -113,7 +113,7 @@ void MX_ADC1_Init(ADC_HandleTypeDef* hadc)
   (*hadc).Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   (*hadc).Init.Resolution = ADC_RESOLUTION_6B;
   (*hadc).Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  (*hadc).Init.ScanConvMode = DISABLE;
+  (*hadc).Init.ScanConvMode = ENABLE;
   (*hadc).Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   //hadc.Init.LowPowerAutoWait = DISABLE;
   (*hadc).Init.ContinuousConvMode = ENABLE;
@@ -149,6 +149,34 @@ rt_uint32_t get_adc_value(ADC_HandleTypeDef* hadc)
     HAL_ADC_PollForConversion(hadc, 100);
 
     return (rt_uint32_t)HAL_ADC_GetValue(hadc);
+}
+
+void ADC_Select_CH0 (ADC_HandleTypeDef* hadc)
+{
+    ADC_ChannelConfTypeDef sConfig = {0};
+      /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+      */
+      sConfig.Channel = ADC_CHANNEL_0;
+      sConfig.Rank = 1;
+      sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+      if (HAL_ADC_ConfigChannel(hadc, &sConfig) != HAL_OK)
+      {
+        Error_Handler();
+      }
+}
+
+void ADC_Select_CH1 (ADC_HandleTypeDef* hadc)
+{
+    ADC_ChannelConfTypeDef sConfig = {0};
+      /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+      */
+      sConfig.Channel = ADC_CHANNEL_1;
+      sConfig.Rank = 1;
+      sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+      if (HAL_ADC_ConfigChannel(hadc, &sConfig) != HAL_OK)
+      {
+        Error_Handler();
+      }
 }
 /* USER CODE END 0 */
 /**

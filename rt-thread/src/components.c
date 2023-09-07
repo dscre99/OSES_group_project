@@ -20,7 +20,6 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include "../../custom_threads/custom_threads_init.h"
-#include "../../custom_timers/custom_timers_init.h"
 #include "../../custom_mailbox/custom_mailbox_init.h"
 
 #ifdef RT_USING_USER_MAIN
@@ -265,14 +264,11 @@ int rtthread_startup(void)
     /* idle thread initialization */
     rt_thread_idle_init();
 
-    /* test thread (print string) initialization */
+    /* Scooter OS threads initialization */
     custom_threads_init();
 
     /* custom mailbox initialization*/
     custom_mailbox_init();
-
-    /* custom timers initialization and startup */
-    //custom_timers_init();
 
 
 #ifdef RT_USING_SMP

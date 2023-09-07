@@ -73,6 +73,8 @@ extern "C" {
 //void Error_Handler(void);
 rt_uint32_t get_adc_value(ADC_HandleTypeDef* hadc);
 void MX_ADC1_Init(ADC_HandleTypeDef* hadc);
+void ADC_Select_CH0 (ADC_HandleTypeDef* hadc);
+void ADC_Select_CH1 (ADC_HandleTypeDef* hadc);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

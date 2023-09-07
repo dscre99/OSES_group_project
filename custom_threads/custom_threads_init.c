@@ -11,17 +11,6 @@
 #include <rtthread.h>
 #include "../custom_threads/thread_functions.h"
 
-/* Thread Functions Prototypes */
-//void print_string(void *parameter);
-//void receive_message(void *parameter);
-
-
-struct rt_thread print_string_thread;
-static rt_uint8_t print_string_thread_stack[512];
-
-struct rt_thread receive_message_thread;
-static rt_uint8_t receive_message_thread_stack[512];
-
 struct rt_thread brake_detection_thread;
 static rt_uint8_t brake_detection_thread_stack[512];
 
@@ -46,25 +35,6 @@ static rt_uint8_t battery_level_thread_stack[512];
 struct rt_thread auxiliary_light_management_thread;
 static rt_uint8_t auxiliary_light_management_thread_stack[512];
 
-//struct rt_thread auxiliary_light_blink_thread;
-//static rt_uint8_t auxiliary_light_blink_thread_stack[512];
-
-
-void launch_print_string_thread(void *parameter)
-{
-    /* Initialize print string thread */
-        /* The thread entry is print_string and the parameter is RT_NULL
-         * Thread stack is print_string_thread_stack
-         * Priority is 5 and time slice is 20 OS Tick
-         */
-    rt_thread_init(&print_string_thread, "print_string_thread", print_string,
-                    RT_NULL, print_string_thread_stack, sizeof(print_string_thread_stack),
-                    5, 20);
-
-    rt_thread_startup(&print_string_thread);
-
-    return;
-}
 
 void custom_threads_init(void)
 {
@@ -73,9 +43,6 @@ void custom_threads_init(void)
          * Thread stack is print_string_thread_stack
          * Priority is 5 and time slice is 20 OS Tick
          */
-    rt_thread_init(&receive_message_thread, "receive_message_thread", receive_message,
-                    RT_NULL, receive_message_thread_stack, sizeof(receive_message_thread_stack),
-                    10, 20);
     rt_thread_init(&brake_detection_thread, "brake_detection_thread", brake_detection,
                     RT_NULL, brake_detection_thread_stack, sizeof(brake_detection_thread_stack),
                     1, 20);
@@ -100,11 +67,7 @@ void custom_threads_init(void)
     rt_thread_init(&auxiliary_light_management_thread, "auxiliary_light_management_thread", auxiliary_light_management,
                     RT_NULL, auxiliary_light_management_thread_stack, sizeof(auxiliary_light_management_thread_stack),
                     6, 20);
-    //rt_thread_init(&auxiliary_light_blink_thread, "auxiliary_light_blink_thread", auxiliary_light_blink,
-    //                RT_NULL, auxiliary_light_blink_thread_stack, sizeof(auxiliary_light_blink_thread_stack),
-    //                6, 20);
 
-    //rt_thread_startup(&receive_message_thread);
     rt_thread_startup(&brake_detection_thread);
     rt_thread_startup(&throttle_detection_thread);
     rt_thread_startup(&speed_detection_thread);
@@ -113,7 +76,6 @@ void custom_threads_init(void)
     rt_thread_startup(&battery_temperature_thread);
     rt_thread_startup(&battery_level_thread);
     rt_thread_startup(&auxiliary_light_management_thread);
-    //rt_thread_startup(&auxiliary_light_blink_thread);
 
 
     return;
