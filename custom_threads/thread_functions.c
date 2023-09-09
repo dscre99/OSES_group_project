@@ -13,6 +13,8 @@
 #include <board.h>
 #include <main.h>
 #include <cpu_usage.h>
+#include <stdint.h>
+#include <stdio.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 #include <../libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h>
 
@@ -65,9 +67,6 @@ void throttle_detection(void * parameters){
     int read_value = 0;
     int throttle = 0;
 
-    float load;
-    cpu_usage_init();
-
     rt_kprintf("-- throttle_detection thread started --\n");
 
     while (1)
@@ -112,8 +111,8 @@ void throttle_detection(void * parameters){
         rt_thread_mdelay(50);
     }
 
-    load = cpu_load_average();
-    rt_kprintf("cpu load average: %f\n", load);
+    //load = cpu_load_average();
+    //rt_kprintf("cpu load average: %f\n", load);
 
 
     return;
@@ -122,7 +121,6 @@ void throttle_detection(void * parameters){
 void speed_detection(void * parameters){
     int read_value = 0;
     int speed = 0;
-
     rt_kprintf("-- speed_detection thread started --\n");
 
     while (1)

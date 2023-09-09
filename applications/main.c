@@ -13,6 +13,8 @@
 #include <board.h>
 #include <main.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <cpu_usage.h>
 #include <../libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 
@@ -56,10 +58,14 @@ int main(void)
     rt_uint32_t read_value_throttle = 0;
     //ADC initialization
     MX_ADC1_Init(&hadc1);
-
+    float load;
+    cpu_usage_init();
 
     while (count++)
     {
+
+        load = cpu_load_average();
+        printf("cpu load average: %f\n",load);
 
         ADC_Select_CH0(&hadc1);
         read_value_speed = get_adc_value(&hadc1);
@@ -83,7 +89,7 @@ int main(void)
 
         rt_mb_send(&mb_main_speed, (rt_uint32_t) read_value_speed);
         rt_mb_send(&mb_main_throttle, (rt_uint32_t) read_value_throttle);
-        //rt_thread_mdelay(3000);
+        rt_thread_mdelay(250);
     }
 
     return RT_EOK;
