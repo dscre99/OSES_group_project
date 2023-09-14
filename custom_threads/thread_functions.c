@@ -15,10 +15,10 @@
 #include <cpu_usage.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "../custom_mailbox/custom_mailbox_init.h"
 #include <../libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h>
-
-ADC_HandleTypeDef hadc1;
 
 #define LED0_PIN    GET_PIN(A, 5)
 #define BUT0_PIN    GET_PIN(C, 13)
@@ -32,6 +32,32 @@ ADC_HandleTypeDef hadc1;
 #define RIGHT 3
 #define BRAKE 4
 #define AMBIENT_TEMP 25
+
+void moltiplica_matrice(int matrice[2][2], int vettore[2]) {
+        int risultato[5] = {0,0};
+        for (int i = 0; i < 1000; i++) {
+            for (int j = 0; j < 1000; j++) {
+                risultato[i%5] += matrice[i%5][j%5] * vettore[j%5];
+            }
+        }
+        vettore[0] = risultato[0];
+        vettore[1] = risultato[1];
+}
+
+/*stress test, hill cypher function*/
+void stress_test(char testo[], int matrice[2][2]) {
+    int i = 0;
+    while (testo[i] != '\0') {
+        if (testo[i] >= '0' && testo[i] <= '9') {
+              int vettore[2] = {testo[i] - 'a', testo[i + 1] - 'a'};
+              moltiplica_matrice(matrice, vettore);
+              testo[i] = 'a' + (vettore[0] % 26);
+              testo[i + 1] = 'a' + (vettore[1] % 26);
+              i++;
+        }
+    i++;
+    }
+}
 
 void brake_detection(void * parameters){
     int brake_status = 0;
@@ -51,8 +77,6 @@ void brake_detection(void * parameters){
 
         // sends mail to throttle_detection
         rt_mb_send(&mb_brake_throttle, (rt_uint32_t)brake_status);
-        // sends mail to speed_detection
-        rt_mb_send(&mb_brake_speed, (rt_uint32_t)brake_status);
         // sends mail to auxiliary_light_management
         rt_mb_send(&mb_brake_alman, (rt_uint32_t)brake_status);
 
@@ -146,6 +170,8 @@ void speed_detection(void * parameters){
 }
 
 void display_management(void * parameters){
+    int matrice[2][2] = {{1,2},{1,2}};
+    char testo[3];
     int speed_value = 0;
     int throttle_value = 0;
     int motor_temperature_warning = -1;
@@ -223,6 +249,9 @@ void display_management(void * parameters){
         if (battery_level_value <= 15)
         {
             rt_kprintf("WARNING! Low BATTERY level!\n");
+            rt_sprintf(testo,"%d",speed_value);
+            //stress test function, hill cypher
+            stress_test(testo,matrice);
         }
 
         rt_thread_mdelay(250);

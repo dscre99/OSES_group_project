@@ -21,7 +21,7 @@ struct rt_mailbox mb_battemp_display;
 struct rt_mailbox mb_batlevel_display;
 struct rt_mailbox mb_brake_throttle;
 struct rt_mailbox mb_brake_alman;
-struct rt_mailbox mb_brake_speed;
+//struct rt_mailbox mb_brake_speed;
 struct rt_mailbox mb_throttle_speed;
 struct rt_mailbox mb_speed_throttle;
 struct rt_mailbox mb_alman_display;
@@ -38,7 +38,7 @@ static char mb_battemp_display_pool[16];
 static char mb_batlevel_display_pool[24];
 static char mb_brake_throttle_pool[128];
 static char mb_brake_alman_pool[128];
-static char mb_brake_speed_pool[128];
+//static char mb_brake_speed_pool[128];
 static char mb_throttle_speed_pool[128];
 static char mb_speed_throttle_pool[128];
 static char mb_alman_display_pool[32];
@@ -170,16 +170,16 @@ int custom_mailbox_init(void)
     }
 
     // initializes brake_detection-speed_detection mailbox
-    err_control = rt_mb_init(&mb_brake_speed,
-                        "mb_brake_speed",                           /* Name is mb_brake_speed*/
-                        &mb_brake_speed_pool[0],                    /* The memory pool used by the mailbox is mb_brake_speed_pool */
-                        sizeof(mb_brake_speed_pool) / 4,            /* The number of messages in the mailbox because a message occupies 4 bytes */
-                        RT_IPC_FLAG_FIFO);                          /* Thread waiting in FIFO approach */
+    /*err_control = rt_mb_init(&mb_brake_speed,
+                        "mb_brake_speed",                           // Name is mb_brake_speed
+                        &mb_brake_speed_pool[0],                    // The memory pool used by the mailbox is mb_brake_speed_pool
+                        sizeof(mb_brake_speed_pool) / 4,            // The number of messages in the mailbox because a message occupies 4 bytes
+                        RT_IPC_FLAG_FIFO);                          // Thread waiting in FIFO approach
     if (err_control != RT_EOK)
     {
         rt_kprintf("init brake_detection-speed_detection mailbox failed.\n");
         return -1;
-    }
+    }*/
 
     // initializes throttle_detection-speed_detection mailbox
     err_control = rt_mb_init(&mb_throttle_speed,
